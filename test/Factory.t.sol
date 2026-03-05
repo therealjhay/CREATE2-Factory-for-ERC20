@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import {Factory} from "../src/VaultFactory.sol";
+import {Factory} from "../src/Factory.sol";
 import {Vault} from "../src/Vault.sol";
 import {VaultNFT} from "../src/VaultNFT.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 
-contract VaultFactoryTest is Test {
+contract FactoryTest is Test {
     // Mainnet USDC token address
     address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
 
