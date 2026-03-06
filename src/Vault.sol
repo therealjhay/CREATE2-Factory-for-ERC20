@@ -1,33 +1,40 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {IERC20} from "forge-std/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Vault {
-    IERC20 public immutable token;
-    address public immutable factory;
+    using SafeERC20 for IERC20;
 
-    uint256 public totalDeposits;
-    mapping(address => uint256) public balances;
+    // The token this vault holds
+    address public immutable TOKEN;
+    
+    // Total amount deposited in this vault
+    uint256 public totalDeposited;
 
-    constructor(IERC20 _token, uint256 initialDeposit, address initialDepositor) {
-        token = _token;
-        factory = msg.sender;
-        if (initialDeposit > 0 && initialDepositor != address(0)) {
-            totalDeposits = initialDeposit;
-            balances[initialDepositor] = initialDeposit;
-        }
+    // Event to track deposits
+    event Deposit(address indexed user, uint256 amount);
+
+    constructor(address _token) {
+        TOKEN = _token;
     }
 
-    modifier onlyFactory() {
-        require(msg.sender == factory, "Not factory");
-        _;
+    // User deposits tokens here
+    function deposit(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than 0");
+        
+        // Move tokens from user to this vault
+        IERC20(TOKEN).safeTransferFrom(msg.sender, address(this), amount);
+        
+        // Update total
+        totalDeposited += amount;
+        
+        emit Deposit(msg.sender, amount);
     }
 
-    function recordDeposit(address user, uint256 amount) external onlyFactory {
-        require(amount > 0, "Zero amount");
-        totalDeposits += amount;
-        balances[user] += amount;
+    // Helper function for the NFT to read balance easily
+    function getBalance() external view returns (uint256) {
+        return IERC20(TOKEN).balanceOf(address(this));
     }
 }
-
